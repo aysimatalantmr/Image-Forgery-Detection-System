@@ -3,7 +3,7 @@ name: SonarCloud Analysis
 on:
   push:
     branches:
-      - main # veya projenin ana branch'i (master vb.)
+      - master # veya projenin ana branch'i (master vb.)
   pull_request:
     types: [opened, synchronize, reopened]
 
