@@ -2,8 +2,6 @@ name: SonarCloud Analizi
 on:
   push:
     branches:
-      - main
-      - ai-model
       - master
 jobs:
   sonarcloud:
