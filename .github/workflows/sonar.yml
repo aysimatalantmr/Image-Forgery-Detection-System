@@ -1,18 +1,27 @@
-name: SonarCloud Analizi
+name: SonarCloud Analysis
+
 on:
   push:
     branches:
-      - master
+      - main # veya projenin ana branch'i (master vb.)
+  pull_request:
+    types: [opened, synchronize, reopened]
+
 jobs:
   sonarcloud:
-    name: SonarCloud
+    name: SonarCloud Scan
     runs-on: ubuntu-latest
+    
     steps:
-      - uses: actions/checkout@v3
+      # 1. Kodu GitHub Actions sunucusuna çeker
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0  
+          fetch-depth: 0  # SonarCloud'un tüm commit geçmişini analiz edebilmesi için 0 olmalı
+
+      # 2. SonarCloud taramasını başlatır
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Pull Request'lere yorum yapabilmesi için (GitHub otomatik sağlar, senin eklemene gerek yok)
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}    # SonarCloud'dan alıp GitHub Secrets'a eklediğin token
