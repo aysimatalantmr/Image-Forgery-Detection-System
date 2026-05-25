@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Görüntü Dedektörü</title>
-    <!-- Tailwind CSS CDN -->
+    <title>AI Görüntü Dedektörü - Geleneksel Algoritmalar</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome (İkonlar için) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { background-color: #0d1117; }
@@ -16,7 +14,6 @@
 </head>
 <body class="text-white font-sans min-h-screen">
 
-    <!-- Header (Üst Kısım) -->
     <header class="flex justify-between items-center px-8 py-4 border-b border-gray-800 bg-[#0d1117]">
         <div class="flex items-center gap-4">
             <div class="bg-indigo-600 p-2 rounded-lg">
@@ -29,86 +26,188 @@
         </div>
         <div class="flex items-center gap-2 bg-gray-800 px-4 py-1.5 rounded-full text-sm font-medium border border-gray-700">
             <span class="w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]"></span>
-            Model Hazır
+            Hibrit ELA Modeli Hazır
         </div>
     </header>
 
-    <!-- Ana İçerik -->
     <main class="max-w-5xl mx-auto mt-10 px-4">
         
-        <!-- Toggle Butonları -->
         <div class="flex justify-center mb-8">
             <div class="bg-gray-800 p-1.5 rounded-full flex gap-2 border border-gray-700">
-                <button class="px-6 py-2 rounded-full bg-gray-900 text-white flex items-center gap-2 shadow text-sm font-medium transition-colors">
+                <button type="button" onclick="selectModel('deep_learning')" id="deepLearningBtn" 
+                   class="px-6 py-2 rounded-full flex items-center gap-2 text-sm font-medium transition-colors 
+                   {% if selected_model == 'deep_learning' %}bg-indigo-600 text-white shadow{% else %}text-gray-400 hover:text-white{% endif %}">
                     <i class="fa-solid fa-network-wired text-indigo-400"></i> Deep Learning
                 </button>
-                <button class="px-6 py-2 rounded-full text-gray-400 hover:text-white flex items-center gap-2 text-sm font-medium transition-colors">
+                <button type="button" onclick="selectModel('traditional')" id="traditionalBtn"
+                   class="px-6 py-2 rounded-full flex items-center gap-2 text-sm font-medium transition-colors 
+                   {% if selected_model == 'traditional' %}bg-teal-600 text-white shadow{% else %}text-gray-400 hover:text-white{% endif %}">
                     <i class="fa-solid fa-microchip text-teal-400"></i> Geleneksel Algoritmalar
                 </button>
             </div>
         </div>
 
-        <!-- Dosya Yükleme Alanı -->
-        <div class="bg-card rounded-2xl p-8 mb-8 border border-gray-800 shadow-lg">
-            <div class="border-2 border-dashed border-gray-700 rounded-xl p-16 text-center hover:border-indigo-500 transition-colors bg-[#0d1117]">
-                
-                <div class="bg-indigo-600/20 w-16 h-16 mx-auto rounded-full flex justify-center items-center mb-4">
-                    <i class="fa-solid fa-arrow-up-from-bracket text-2xl text-indigo-400"></i>
+        <div class="bg-card rounded-2xl p-8 mb-8 border border-gray-800 shadow-lg" id="workPanel">
+            
+            <div id="uploadArea" class="{% if original_image_url %}hidden{% endif %}">
+                <div id="dropzoneContainer" class="border-2 border-dashed border-gray-700 rounded-xl p-16 text-center hover:border-indigo-500 transition-all duration-300 bg-[#0d1117]">
+                    <div class="bg-indigo-600/20 w-16 h-16 mx-auto rounded-full flex justify-center items-center mb-4">
+                        <i class="fa-solid fa-arrow-up-from-bracket text-2xl text-indigo-400"></i>
+                    </div>
+                    
+                    <h2 class="text-2xl font-semibold mb-2">Görüntü Yükle</h2>
+                    <p class="text-gray-400 mb-6 text-sm">PNG, JPG, JPEG formatında görüntü yükleyin</p>
+                    
+                    <form method="POST" enctype="multipart/form-data" id="uploadForm">
+                        {% csrf_token %}
+                        <input type="hidden" name="selected_model_input" id="selectedModelInput" value="{{ selected_model }}">
+                        
+                        <label id="uploadLabel" class="bg-indigo-500 hover:bg-indigo-600 text-white px-6 py-2.5 rounded-lg cursor-pointer inline-flex items-center gap-2 transition-all font-medium">
+                            
+                            <span id="normalState" class="flex items-center gap-2">
+                                <i class="fa-regular fa-image"></i> Dosya Seç
+                            </span>
+                            
+                            <span id="loadingState" class="hidden flex items-center gap-2">
+                                <i class="fa-solid fa-circle-notch fa-spin"></i> Analiz Ediliyor...
+                            </span>
+
+                            <input type="file" name="image" class="hidden" accept=".png, .jpg, .jpeg" onchange="startUploadProcess();">
+                        </label>
+                    </form>
                 </div>
-                
-                <h2 class="text-2xl font-semibold mb-2">Görüntü Yükle</h2>
-                <p class="text-gray-400 mb-6 text-sm">PNG, JPG, JPEG formatında görüntü yükleyin</p>
-                
-                <form method="POST" enctype="multipart/form-data" id="uploadForm">
-                    {% csrf_token %}
-                    <label class="bg-indigo-500 hover:bg-indigo-600 text-white px-6 py-2.5 rounded-lg cursor-pointer inline-flex items-center gap-2 transition-colors font-medium">
-                        <i class="fa-regular fa-image"></i> Dosya Seç
-                        <!-- Gizli input -->
-                        <input type="file" name="image" class="hidden" accept=".png, .jpg, .jpeg" onchange="document.getElementById('uploadForm').submit();">
-                    </label>
-                </form>
-
             </div>
+
+            {% if original_image_url %}
+            <div id="resultsArea" class="mt-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                    <div>
+                        <h4 class="text-sm text-gray-400 mb-2 uppercase font-medium">İncelenen Görüntü</h4>
+                        <img src="{{ original_image_url }}" alt="Orijinal Görüntü" class="max-w-full h-auto rounded-xl shadow-lg border border-gray-700">
+                    </div>
+                    
+                    <div>
+                        <h4 class="text-sm {% if selected_model == 'traditional' %}text-teal-400{% else %}text-indigo-400{% endif %} mb-2 uppercase font-medium">
+                            Analiz Raporu
+                        </h4>
+                        
+                        <div class="{% if selected_model == 'traditional' %}bg-teal-900/10 border-teal-800{% else %}bg-indigo-900/10 border-indigo-800{% endif %} p-6 rounded-2xl border h-full flex flex-col justify-center">
+                            <div class="flex items-center gap-4 mb-6">
+                                <div class="{% if selected_model == 'traditional' %}bg-teal-600/20 text-teal-400{% else %}bg-indigo-600/20 text-indigo-400{% endif %} p-3 rounded-lg">
+                                    {% if selected_model == 'traditional' %}<i class="fa-solid fa-microchip text-xl"></i>{% else %}<i class="fa-solid fa-brain text-xl"></i>{% endif %}
+                                </div>
+                                <h3 class="text-lg font-semibold">
+                                    {% if selected_model == 'traditional' %}Hibrit ELA Tespit Sonuçları{% else %}Derin Öğrenme Sonuçları{% endif %}
+                                </h3>
+                            </div>
+                            
+                            {% if detection_results %}
+                            <ul class="space-y-4">
+                                {% for item in detection_results %}
+                                <li class="flex justify-between items-center text-gray-300 border-b border-gray-800/50 pb-3 last:border-0 last:pb-0">
+                                    <span class="font-medium">{{ item.feature }}</span>
+                                    
+                                    <span class="text-sm font-bold text-right
+                                        {% if 'Sahte' in item.result %} text-red-500 drop-shadow-[0_0_5px_rgba(239,68,68,0.5)]
+                                        {% elif 'Orijinal' in item.result %} text-green-500 drop-shadow-[0_0_5px_rgba(34,197,94,0.5)]
+                                        {% elif selected_model == 'traditional' %} text-teal-400 
+                                        {% else %} text-indigo-400 {% endif %}">
+                                        {{ item.result }}
+                                    </span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            {% else %}
+                            <p class="text-gray-400 text-sm text-center py-4">Model sonuçları bekleniyor...</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end mt-2">
+                    <a href="/" class="bg-gray-700 hover:bg-gray-600 text-white px-5 py-2 rounded-lg text-sm flex items-center gap-2 transition-colors">
+                        <i class="fa-solid fa-arrow-left"></i> Yeni Görüntü Yükle
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
         </div>
 
-        <!-- Eğer Görüntü Yüklendiyse Göster -->
-        {% if uploaded_file_url %}
-        <div class="bg-card rounded-2xl p-6 mb-8 border border-green-800 shadow-lg text-center">
-            <h3 class="text-green-400 font-semibold mb-4">Görüntü Başarıyla Yüklendi!</h3>
-            <img src="{{ uploaded_file_url }}" alt="Yüklenen Görsel" class="max-w-md mx-auto rounded-lg shadow">
-        </div>
-        {% endif %}
-
-        <!-- Alt Bilgi Kartları -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Deep Learning Kartı -->
             <div class="bg-card p-6 rounded-2xl border border-gray-800 hover:border-indigo-500/50 transition-colors">
                 <div class="flex items-center gap-4 mb-4">
                     <div class="bg-indigo-600/20 p-3 rounded-lg text-indigo-400">
                         <i class="fa-solid fa-brain text-xl"></i>
                     </div>
-                    <h3 class="text-lg font-semibold">Deep Learning Modeli</h3>
+                    <h3 class="text-lg font-semibold">Derin Öğrenme Modeli</h3>
                 </div>
                 <p class="text-gray-400 text-sm leading-relaxed">
-                    COCO-SSD modeli kullanılarak 80+ farklı nesne sınıfını gerçek zamanlı olarak tespit eder. Yüksek doğruluk oranı ve karmaşık sahneleri anlama kapasitesine sahiptir.
+                    Yüksek doğruluk oranı ve karmaşık sahneleri anlama kapasitesine sahiptir. Saf CNN/Transformer mimarileri entegrasyonu için planlanmıştır.
                 </p>
             </div>
 
-            <!-- Geleneksel Algoritmalar Kartı -->
             <div class="bg-[#121b22] p-6 rounded-2xl border border-teal-900/50 hover:border-teal-500/50 transition-colors">
                 <div class="flex items-center gap-4 mb-4">
                     <div class="bg-teal-600/20 p-3 rounded-lg text-teal-400">
                         <i class="fa-solid fa-microchip text-xl"></i>
                     </div>
-                    <h3 class="text-lg font-semibold">Geleneksel Algoritmalar</h3>
+                    <h3 class="text-lg font-semibold">Hibrit ELA Modeli</h3>
                 </div>
                 <p class="text-gray-400 text-sm leading-relaxed">
-                    Kenar tespiti, renk analizi ve parlaklık hesaplama gibi klasik bilgisayarlı görü tekniklerini kullanır. Daha hızlı çalışır ve daha az işlem gücü gerektirir.
+                    Görüntü manipülasyonlarını tespit etmek için geleneksel <strong>Error Level Analysis (ELA)</strong> tekniği ile derin öğrenme <strong>(Xception CNN)</strong> mimarisini harmanlayarak çalışır. (Şu an Aktif)
                 </p>
             </div>
         </div>
 
     </main>
+
+    <script>
+        // Model Geçişleri İçin
+        function selectModel(model) {
+            document.getElementById('selectedModelInput').value = model;
+
+            const deepBtn = document.getElementById('deepLearningBtn');
+            const tradBtn = document.getElementById('traditionalBtn');
+
+            if (model === 'deep_learning') {
+                deepBtn.classList.add('bg-indigo-600', 'text-white', 'shadow');
+                deepBtn.classList.remove('text-gray-400', 'hover:text-white');
+                tradBtn.classList.remove('bg-teal-600', 'text-white', 'shadow');
+                tradBtn.classList.add('text-gray-400', 'hover:text-white');
+            } else if (model === 'traditional') {
+                tradBtn.classList.add('bg-teal-600', 'text-white', 'shadow');
+                tradBtn.classList.remove('text-gray-400', 'hover:text-white');
+                deepBtn.classList.remove('bg-indigo-600', 'text-white', 'shadow');
+                deepBtn.classList.add('text-gray-400', 'hover:text-white');
+            }
+        }
+
+        // Yükleme Animasyonu İçin Yeni Fonksiyon
+        function startUploadProcess() {
+            // 1. İlgili elementleri seç
+            const normalState = document.getElementById('normalState');
+            const loadingState = document.getElementById('loadingState');
+            const uploadLabel = document.getElementById('uploadLabel');
+            const dropzoneContainer = document.getElementById('dropzoneContainer');
+            const uploadForm = document.getElementById('uploadForm');
+
+            // 2. Buton içeriğini değiştir (Spinner'ı göster)
+            normalState.classList.add('hidden');
+            loadingState.classList.remove('hidden');
+            loadingState.classList.add('flex'); // Flex yapısını koru
+
+            // 3. Butonun rengini ve tıklanabilirliğini pasifleştir
+            uploadLabel.classList.remove('hover:bg-indigo-600', 'cursor-pointer', 'bg-indigo-500');
+            uploadLabel.classList.add('bg-indigo-800', 'cursor-not-allowed', 'opacity-80');
+            
+            // 4. Arka planı hafifçe soluklaştır (odak efekti)
+            dropzoneContainer.classList.add('opacity-50');
+
+            // 5. Formu submit et (Django arkada resmi işlerken bu görünüm kalacak)
+            uploadForm.submit();
+        }
+    </script>
 
 </body>
 </html>
