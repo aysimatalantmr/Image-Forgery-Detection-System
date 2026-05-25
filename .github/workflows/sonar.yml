@@ -4,6 +4,7 @@ on:
     branches:
       - main
       - ai-model
+      - master
 jobs:
   sonarcloud:
     name: SonarCloud
