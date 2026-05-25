@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - ai-model
 jobs:
   sonarcloud:
     name: SonarCloud
