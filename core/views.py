@@ -1,47 +1,40 @@
 from django.shortcuts import render
 from django.core.files.storage import FileSystemStorage
 
-# ELA işlemi ve .h5 modelini çalıştıran fonksiyonumuzu içeri aktarıyoruz
+# İki modelimizi de içeri aktarıyoruz
 from .traditional_models import predict_with_h5_model 
+from .deep_learning_models import predict_with_deep_learning 
 
 def index(request):
-    # Başlangıç değerleri
     original_image_url = None
     result_image_url = None
     detection_results = None
-    selected_model = 'traditional' # Artık varsayılan olarak geleneksel (ELA) modelimiz aktif
+    selected_model = 'deep_learning' 
 
     if request.method == 'POST' and request.FILES.get('image'):
         
-        # 1. Görüntüyü Diske Kaydetme (Veritabanı olmadan)
+        # 1. Görüntüyü diske kaydet
         upload = request.FILES['image']
         fss = FileSystemStorage()
         file = fss.save(upload.name, upload)
         
-        # Dosya yolları
         original_image_url = fss.url(file)
         absolute_path = fss.path(file)
 
-        # 2. Hangi Modelin Seçildiğini Alma
+        # 2. Hangi butonun seçildiğini al
         selected_model = request.POST.get('selected_model_input', 'traditional')
 
-        # 3. İlgili Modeli Çalıştırma
+        # 3. İlgili Yapay Zeka Modelini Çalıştır
         if selected_model == 'traditional':
-            # ELA + Xception modeline resmi gönderiyoruz
+            # Geleneksel/Hibrit ELA modeli (.h5)
             detection_results = predict_with_h5_model(absolute_path)
-            
-            # Modelimiz yeni bir çıktı görseli üretmiyor, metinsel/skor bazlı sonuç veriyor. 
-            # Bu yüzden sonuç görseli olarak yine orijinali gösteriyoruz.
             result_image_url = original_image_url 
-        
+            
         elif selected_model == 'deep_learning':
-            # Diğer buton için yer tutucu
+            # Yeni PyTorch Fusion Modeli (.pth)
+            detection_results = predict_with_deep_learning(absolute_path)
             result_image_url = original_image_url
-            detection_results = [
-                {"feature": "Durum", "result": "Derin Öğrenme (Deep Learning) modeli henüz bağlanmadı."}
-            ]
 
-    # 4. Şablona Gönderilecek Veriler
     context = {
         'original_image_url': original_image_url,
         'result_image_url': result_image_url,
