@@ -16,7 +16,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y doxygen graphviz
 
       - name: Semalari ve Dokumani Olustur
-        run: doxygen Doxyfile
+        run: doxygen Doxyfile.properties
 
       - name: GitHub Pages ile Web Sitesi Olarak Yayinla
         uses: peaceiris/actions-gh-pages@v4
