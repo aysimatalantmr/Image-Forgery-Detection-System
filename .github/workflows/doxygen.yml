@@ -2,8 +2,7 @@ name: Doxygen Dokumantasyonunu Uret ve Yayinla
 
 on:
   push:
-    branches:
-      - main  # Senin ana dalın main olduğu için burada çalışacak
+    branches: ["main", "master"]
 
 jobs:
   build-and-deploy:
