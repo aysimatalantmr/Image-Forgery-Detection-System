@@ -1,0 +1,25 @@
+name: Doxygen Dokumantasyonunu Uret ve Yayinla
+
+on:
+  push:
+    branches:
+      - main  # Senin ana dalın main olduğu için burada çalışacak
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Kodu Cek
+        uses: actions/checkout@v4
+
+      - name: Doxygen ve Graphviz Kur (GitHub Sunucusuna)
+        run: sudo apt-get update && sudo apt-get install -y doxygen graphviz
+
+      - name: Semalari ve Dokumani Olustur
+        run: doxygen Doxyfile
+
+      - name: GitHub Pages ile Web Sitesi Olarak Yayinla
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs_html
