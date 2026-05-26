@@ -1,0 +1,21 @@
+PROJECT_NAME           = "AI Goruntu Dedektoru"
+OUTPUT_DIRECTORY       = .
+GENERATE_HTML          = YES
+HTML_OUTPUT            = docs_html
+GENERATE_LATEX         = NO
+
+# Python kodlarını kutucuklar halinde güzel göstermesi için:
+OPTIMIZE_OUTPUT_JAVA   = YES
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = YES
+
+# Graphviz ve UML (Oklar ve Şemalar) Ayarları:
+HAVE_DOT               = YES
+UML_LOOK               = YES
+CALL_GRAPH             = YES
+CALLER_GRAPH           = YES
+
+# Hangi dosyalar taranacak?
+RECURSIVE              = YES
+FILE_PATTERNS          = *.py
+EXCLUDE                = venv/ migrations/ manage.py settings.py ai_detector/settings.py
