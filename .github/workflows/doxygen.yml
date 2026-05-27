@@ -11,12 +11,29 @@ jobs:
       - name: Kodu Cek
         uses: actions/checkout@v4
 
-      - name: Doxygen ve Graphviz Kur (GitHub Sunucusuna)
+      - name: Doxygen ve Graphviz Kur
         run: sudo apt-get update && sudo apt-get install -y doxygen graphviz
 
       - name: Semalari ve Dokumani Olustur
+        # ÖNEMLİ: Eğer dosyanın adı sadece 'Doxyfile' ise burayı düzelt!
         run: doxygen Doxyfile.properties
 
+      # --- PDF OLUŞTURMA VE İNDİRME ADIMLARI ---
+      - name: Install LaTeX Components
+        run: sudo apt-get install -y texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended gnuplot
+
+      - name: Compile Doxygen PDF
+        run: |
+          cd docs_latex
+          make
+
+      - name: Upload PDF Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Proje-Doxygen-PDF-Raporu
+          path: docs_latex/refman.pdf
+
+      # --- HTML SİTESİNİ YAYINLAMA ADIMI ---
       - name: GitHub Pages ile Web Sitesi Olarak Yayinla
         uses: peaceiris/actions-gh-pages@v4
         with:
