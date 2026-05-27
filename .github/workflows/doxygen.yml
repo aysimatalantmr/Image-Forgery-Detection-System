@@ -33,9 +33,4 @@ jobs:
           name: Proje-Doxygen-PDF-Raporu
           path: docs_latex/refman.pdf
 
-      # --- HTML SİTESİNİ YAYINLAMA ADIMI ---
-      - name: GitHub Pages ile Web Sitesi Olarak Yayinla
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs_html
+    
